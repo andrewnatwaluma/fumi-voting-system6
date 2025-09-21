@@ -340,6 +340,24 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
+        
+        .error-message {
+            color: #e63946;
+            padding: 10px;
+            background: #ffeaea;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .success-message {
+            color: #228B22;
+            padding: 10px;
+            background: #f0fff0;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -365,7 +383,8 @@
                         <input type="text" placeholder="Enter your full name..." id="voter-search-input">
                         <button onclick="searchVoter()">Search</button>
                     </div>
-                    <p id="voter-error" style="color: #e63946; display: none;">Voter not found. Please check your name and try again.</p>
+                    <div id="voter-error" class="error-message" style="display: none;"></div>
+                    <div id="voter-success" class="success-message" style="display: none;"></div>
                 </div>
                 
                 <div style="text-align: center; margin-top: 30px;">
@@ -379,12 +398,12 @@
             <div class="view-container" id="voter-details">
                 <h2><i class="fas fa-user-circle"></i> Voter Information</h2>
                 <div class="voter-details">
-                    <p><strong>Name:</strong> Acar Jimmy</p>
-                    <p><strong>University:</strong> Busitema University</p>
-                    <p><strong>Qualification:</strong> MBChB</p>
-                    <p><strong>Nationality:</strong> Ugandan</p>
-                    <p><strong>Completion Year:</strong> 2024</p>
-                    <p><strong>Internship Center:</strong> Fort Portal RRH</p>
+                    <p><strong>Name:</strong> <span id="detail-name"></span></p>
+                    <p><strong>University:</strong> <span id="detail-university"></span></p>
+                    <p><strong>Qualification:</strong> <span id="detail-qualification"></span></p>
+                    <p><strong>Nationality:</strong> <span id="detail-nationality"></span></p>
+                    <p><strong>Completion Year:</strong> <span id="detail-year"></span></p>
+                    <p><strong>Internship Center:</strong> <span id="detail-center"></span></p>
                 </div>
                 <button onclick="showProvisionalUpload()">Proceed to Vote</button>
                 <button class="back-btn" onclick="showVoterSearch()">Back to Search</button>
@@ -411,35 +430,11 @@
                 <h2><i class="fas fa-vote-yea"></i> Cast Your Vote</h2>
                 <p>Please select one candidate for each position.</p>
                 
-                <div class="position-section">
-                    <h3>President</h3>
-                    <div class="candidates-list">
-                        <label class="candidate-option">
-                            <input type="radio" name="president" value="candidate1">
-                            Dr. John Omondi
-                        </label>
-                        <label class="candidate-option">
-                            <input type="radio" name="president" value="candidate2">
-                            Dr. Sarah Musoke
-                        </label>
-                    </div>
+                <div id="positions-container">
+                    <!-- Positions will be dynamically added here -->
                 </div>
-                
-                <div class="position-section">
-                    <h3>Vice President</h3>
-                    <div class="candidates-list">
-                        <label class="candidate-option">
-                            <input type="radio" name="vice-president" value="candidate1">
-                            Dr. Robert Mugabe
-                        </label>
-                        <label class="candidate-option">
-                            <input type="radio" name="vice-president" value="candidate2">
-                            Dr. Grace Nalweiso
-                        </label>
-                    </div>
-                </div>
-                
-                <button class="submit-votes-btn" onclick="submitVotes()">
+
+                <button class="submit-votes-btn" onclick="submitVotes()" id="submit-votes-button">
                     <i class="fas fa-paper-plane"></i> Submit All Votes
                 </button>
             </div>
@@ -453,8 +448,9 @@
                     
                     <div class="results-preview">
                         <h3><i class="fas fa-chart-pie"></i> Current Results (Percentages)</h3>
-                        <p>President: Omondi 52% - Musoke 48%</p>
-                        <p>Vice President: Mugabe 45% - Nalweiso 55%</p>
+                        <div id="results-container">
+                            <!-- Results will be dynamically added here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -463,8 +459,8 @@
             <div class="view-container" id="admin-login">
                 <h2><i class="fas fa-lock"></i> Admin Login</h2>
                 <div class="admin-login-form">
-                    <input type="text" placeholder="Username">
-                    <input type="password" placeholder="Password">
+                    <input type="text" placeholder="Username" id="admin-username">
+                    <input type="password" placeholder="Password" id="admin-password">
                     <button onclick="attemptAdminLogin()">Login</button>
                     <button class="back-btn" onclick="showVoterSearch()">Back to Voter Login</button>
                 </div>
@@ -478,6 +474,121 @@
     </div>
 
     <script>
+        // Voter data - Simulating database
+        const voterDatabase = [
+            { id: 1, name: "Acar Jimmy", university: "Busitema University", qualification: "MBChB", 
+              nationality: "Ugandan", completionYear: 2024, internshipCenter: "Fort Portal RRH", hasVoted: false },
+            { id: 2, name: "John Omondi", university: "Makerere University", qualification: "MBChB", 
+              nationality: "Kenyan", completionYear: 2023, internshipCenter: "Mulago NRH", hasVoted: false },
+            { id: 3, name: "Sarah Musoke", university: "Mbarara University", qualification: "BPharm", 
+              nationality: "Ugandan", completionYear: 2024, internshipCenter: "Jinja RRH", hasVoted: true },
+            { id: 4, name: "Robert Mugabe", university: "Gulu University", qualification: "MBChB", 
+              nationality: "Zimbabwean", completionYear: 2023, internshipCenter: "Lira RRH", hasVoted: false },
+            { id: 5, name: "Grace Nalweiso", university: "Kampala International University", qualification: "BSc Nursing", 
+              nationality: "Ugandan", completionYear: 2024, internshipCenter: "Mbale RRH", hasVoted: false }
+        ];
+
+        // Positions and candidates data
+        const positionsData = [
+            {
+                id: 1,
+                title: "PRESIDENT",
+                candidates: [
+                    { id: 1, name: "Dr. John Omondi" },
+                    { id: 2, name: "Dr. Sarah Musoke" }
+                ]
+            },
+            {
+                id: 2,
+                title: "VICE PRESIDENT",
+                candidates: [
+                    { id: 3, name: "Dr. Robert Mugabe" },
+                    { id: 4, name: "Dr. Grace Nalweiso" }
+                ]
+            },
+            {
+                id: 3,
+                title: "SECRETARY GENERAL",
+                candidates: [
+                    { id: 5, name: "Dr. James Okello" },
+                    { id: 6, name: "Dr. Rebecca Namukwaya" }
+                ]
+            },
+            {
+                id: 4,
+                title: "TREASURER GENERAL",
+                candidates: [
+                    { id: 7, name: "Dr. Michael Ssebunya" },
+                    { id: 8, name: "Dr. Susan Ajok" }
+                ]
+            },
+            {
+                id: 5,
+                title: "CHAIRPERSON WELFARE",
+                candidates: [
+                    { id: 9, name: "Dr. Daniel Odongo" }
+                ]
+            },
+            {
+                id: 6,
+                title: "CHAIRPERSON ETHICS AND PROFESSIONALISM",
+                candidates: [
+                    { id: 10, name: "Dr. Elizabeth Katushabe" },
+                    { id: 11, name: "Dr. Patrick Lumumba" }
+                ]
+            },
+            {
+                id: 7,
+                title: "DIRECTOR OF PUBLICATIONS",
+                candidates: [
+                    { id: 12, name: "Dr. Brian Mulumba" },
+                    { id: 13, name: "Dr. Fiona Nakimera" }
+                ]
+            },
+            {
+                id: 8,
+                title: "INTERN DOCTOR'S REPRESENTATIVE",
+                candidates: [
+                    { id: 14, name: "Dr. Alex Wasswa" }
+                ]
+            },
+            {
+                id: 9,
+                title: "INTERN PHARMACISTS' REPRESENTATIVE",
+                candidates: [
+                    { id: 15, name: "Dr. Maria Goretti" },
+                    { id: 16, name: "Dr. Henry Kawooya" }
+                ]
+            },
+            {
+                id: 10,
+                title: "INTERN MIDWIVES' REPRESENTATIVE",
+                candidates: [
+                    { id: 17, name: "Dr. Prossy Nalubega" }
+                ]
+            },
+            {
+                id: 11,
+                title: "INTERN NURSE REPRESENTATIVE",
+                candidates: [
+                    { id: 18, name: "Dr. Juliet Kemi" },
+                    { id: 19, name: "Dr. Tom Lwanga" }
+                ]
+            },
+            {
+                id: 12,
+                title: "INTERN DENTAL SURGEON REPRESENTATIVE",
+                candidates: [
+                    { id: 20, name: "Dr. Samuel Nsubuga" }
+                ]
+            }
+        ];
+
+        // Track current voter and votes
+        let currentVoter = null;
+        const selectedVotes = {};
+        let votedPositions = new Set();
+
         // View management functions
         function showView(viewId) {
             document.querySelectorAll('.view-container').forEach(view => {
@@ -499,10 +610,14 @@
         }
 
         function showVotingScreen() {
+            // Render all positions and candidates
+            renderPositions();
             showView('voting-screen');
         }
 
         function showThankYou() {
+            // Calculate and display results
+            renderResults();
             showView('thank-you');
         }
 
@@ -510,10 +625,84 @@
             showView('admin-login');
         }
 
+        // Render all positions and candidates
+        function renderPositions() {
+            const container = document.getElementById('positions-container');
+            container.innerHTML = '';
+            
+            positionsData.forEach(position => {
+                const positionSection = document.createElement('div');
+                positionSection.className = 'position-section';
+                
+                positionSection.innerHTML = `
+                    <h3>${position.title}</h3>
+                    <div class="candidates-list" id="position-${position.id}">
+                        ${position.candidates.map(candidate => `
+                            <label class="candidate-option">
+                                <input type="radio" name="position-${position.id}" 
+                                    value="${candidate.id}" onchange="selectCandidate(${position.id}, ${candidate.id})">
+                                ${candidate.name}
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(positionSection);
+            });
+            
+            // Update submit button state
+            updateSubmitButtonState();
+        }
+
+        // Select candidate for a position
+        function selectCandidate(positionId, candidateId) {
+            selectedVotes[positionId] = candidateId;
+            votedPositions.add(positionId);
+            updateSubmitButtonState();
+        }
+
+        // Update submit button state based on whether all positions have votes
+        function updateSubmitButtonState() {
+            const submitButton = document.getElementById('submit-votes-button');
+            submitButton.disabled = votedPositions.size !== positionsData.length;
+        }
+
+        // Render results
+        function renderResults() {
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            
+            // Simulated results data
+            const resultsData = [
+                { position: "PRESIDENT", candidate: "Dr. John Omondi", percentage: 52 },
+                { position: "VICE PRESIDENT", candidate: "Dr. Grace Nalweiso", percentage: 55 },
+                { position: "SECRETARY GENERAL", candidate: "Dr. James Okello", percentage: 48 },
+                { position: "TREASURER GENERAL", candidate: "Dr. Michael Ssebunya", percentage: 61 },
+                { position: "CHAIRPERSON WELFARE", candidate: "Dr. Daniel Odongo", percentage: 100 },
+                { position: "CHAIRPERSON ETHICS", candidate: "Dr. Elizabeth Katushabe", percentage: 57 },
+                { position: "DIRECTOR OF PUBLICATIONS", candidate: "Dr. Fiona Nakimera", percentage: 63 },
+                { position: "INTERN DOCTOR'S REP", candidate: "Dr. Alex Wasswa", percentage: 100 },
+                { position: "INTERN PHARMACISTS' REP", candidate: "Dr. Maria Goretti", percentage: 72 },
+                { position: "INTERN MIDWIVES' REP", candidate: "Dr. Prossy Nalubega", percentage: 100 },
+                { position: "INTERN NURSE REP", candidate: "Dr. Juliet Kemi", percentage: 68 },
+                { position: "INTERN DENTAL SURGEON REP", candidate: "Dr. Samuel Nsubuga", percentage: 100 }
+            ];
+            
+            resultsData.forEach(result => {
+                const resultElement = document.createElement('p');
+                resultElement.textContent = `${result.position}: ${result.candidate} - ${result.percentage}%`;
+                container.appendChild(resultElement);
+            });
+        }
+
         // Functionality functions
         function searchVoter() {
             const searchInput = document.getElementById('voter-search-input');
             const errorElement = document.getElementById('voter-error');
+            const successElement = document.getElementById('voter-success');
+            
+            errorElement.style.display = 'none';
+            successElement.style.display = 'none';
             
             if (searchInput.value.trim() === '') {
                 errorElement.textContent = 'Please enter your name';
@@ -521,10 +710,31 @@
                 return;
             }
             
-            // Simulate search - in a real app, this would call your Supabase database
-            if (searchInput.value.toLowerCase().includes('acar')) {
+            // Search for voter (case insensitive)
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            const foundVoter = voterDatabase.find(voter => 
+                voter.name.toLowerCase().includes(searchTerm)
+            );
+            
+            if (foundVoter) {
+                if (foundVoter.hasVoted) {
+                    errorElement.textContent = 'This voter has already voted. Each voter can only vote once.';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // Set current voter
+                currentVoter = foundVoter;
+                
+                // Populate voter details
+                document.getElementById('detail-name').textContent = foundVoter.name;
+                document.getElementById('detail-university').textContent = foundVoter.university;
+                document.getElementById('detail-qualification').textContent = foundVoter.qualification;
+                document.getElementById('detail-nationality').textContent = foundVoter.nationality;
+                document.getElementById('detail-year').textContent = foundVoter.completionYear;
+                document.getElementById('detail-center').textContent = foundVoter.internshipCenter;
+                
                 showVoterDetails();
-                errorElement.style.display = 'none';
             } else {
                 errorElement.textContent = 'Voter not found. Please check your name and try again.';
                 errorElement.style.display = 'block';
@@ -547,11 +757,22 @@
         }
 
         function submitVotes() {
+            // Check if all positions have been voted for
+            if (votedPositions.size !== positionsData.length) {
+                alert('Please vote for all positions before submitting.');
+                return;
+            }
+            
             // Show loading state
-            const button = document.querySelector('.submit-votes-btn');
+            const button = document.getElementById('submit-votes-button');
             const originalText = button.textContent;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Votes...';
             button.disabled = true;
+            
+            // Mark voter as voted
+            if (currentVoter) {
+                currentVoter.hasVoted = true;
+            }
             
             // Simulate vote submission
             setTimeout(() => {
@@ -560,7 +781,14 @@
         }
 
         function attemptAdminLogin() {
-            alert('Admin login functionality will be implemented in the next version.');
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            
+            if (username === 'admin' && password === 'password') {
+                alert('Admin login successful! Admin features will be implemented in the next version.');
+            } else {
+                alert('Invalid admin credentials. Please try again.');
+            }
         }
 
         // Initialize the app
@@ -571,4 +799,4 @@
         });
     </script>
 </body>
-</html>
+                                                   </html>
