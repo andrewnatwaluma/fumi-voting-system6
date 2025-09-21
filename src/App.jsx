@@ -70,14 +70,6 @@ function App() {
     setCurrentView('provisional-upload');
   };
 
-  const handlePhotoUpload = () => {
-    // Simulate photo upload process
-    setTimeout(() => {
-      loadCandidates();
-      setCurrentView('voting-screen');
-    }, 2000);
-  };
-
   const loadCandidates = async () => {
     // Get unique positions from candidates table
     const { data: positionsData, error } = await supabase
@@ -128,15 +120,26 @@ function App() {
     const votePromises = [];
 
     for (const [positionTitle, candidateId] of Object.entries(selectedCandidates)) {
-      votePromises.push(
-        supabase.from('votes').insert([{
-          voter_id: foundVoter.id,
-          candidate_id: candidateId,
-          position: positionTitle,
-          device_id: deviceId,
-          created_at: new Date().toISOString()
-        }])
-      );
+      // First, we need to get the position_id for this position title
+      const positionData = positions.find(p => p.title === positionTitle);
+      
+      if (positionData && positionData.candidates.length > 0) {
+        // Get the first candidate to find their position_id (all candidates for a position share the same position_id)
+        const candidateData = positionData.candidates.find(c => c.id === candidateId);
+        
+        if (candidateData) {
+          votePromises.push(
+            supabase.from('votes').insert([{
+              voter_id: foundVoter.id,
+              candidate_id: candidateId,
+              position_id: candidateData.position_id, // Use the position_id from the candidate
+              position: positionTitle, // Also include position text for reference
+              device_id: deviceId,
+              created_at: new Date().toISOString()
+            }])
+          );
+        }
+      }
     }
 
     // Mark voter as voted
@@ -152,6 +155,7 @@ function App() {
       const hasError = results.some(result => result.error);
 
       if (hasError) {
+        console.error('Vote submission errors:', results);
         alert('Error submitting votes. Please try again.');
         return;
       }
@@ -161,7 +165,8 @@ function App() {
       loadResults(); // Load results to show percentages
       setCurrentView('thank-you');
     } catch (error) {
-      alert('Error: ' + error.message);
+      console.error('Critical error:', error);
+      alert('A critical error occurred: ' + error.message);
     }
   };
 
