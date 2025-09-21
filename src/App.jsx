@@ -234,10 +234,27 @@ function App() {
           <div className="view-container">
             <h2>Identity Verification</h2>
             <p>Please upload a clear photo of your provisional license for verification.</p>
+            <p><em>(This is required to proceed to the voting ballot)</em></p>
+            
             <div className="upload-box">
-              <input type="file" accept="image/*" capture="camera" />
-              <button onClick={handlePhotoUpload}>Upload Photo</button>
+              <input 
+                type="file" 
+                accept="image/*" 
+                capture="camera" 
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    // Simulate a 5-second verification process
+                    setTimeout(() => {
+                      alert("✅ Verification successful! Photo accepted.");
+                      loadCandidates();
+                      setCurrentView('voting-screen');
+                    }, 5000); // Simulate a 5 second "verification" process
+                  }
+                }}
+              />
+              <p className="upload-hint">📸 Tap to open your camera or select a photo from your gallery</p>
             </div>
+            
             <button onClick={() => setCurrentView('voter-details')} className="back-btn">
               Back to Details
             </button>
