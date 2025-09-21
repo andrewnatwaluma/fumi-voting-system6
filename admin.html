@@ -300,8 +300,8 @@
                     </h2>
                     
                     <div class="form-group">
-                        <label for="admin-username">Username</label>
-                        <input type="text" id="admin-username" placeholder="Enter your username">
+                        <label for="admin-email">Email Address</label>
+                        <input type="email" id="admin-email" placeholder="Enter your admin email">
                     </div>
                     
                     <div class="form-group">
@@ -450,20 +450,6 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhZW50dGtva2N4dGlhdXpqdGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NDQ2NDksImV4cCI6MjA3MzQyMDY0OX0.u6ZBX-d_CTNlA94OM7h2JerNpmhuHZxYSXmj0OxRhRI';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Predefined admin credentials (in a real system, these would be hashed and stored securely)
-        const adminCredentials = {
-            admin: {
-                username: "admin",
-                password: "admin123",
-                role: "admin"
-            },
-            superadmin: {
-                username: "superadmin", 
-                password: "super123",
-                role: "super_admin"
-            }
-        };
-
         // Current user info
         let currentAdmin = null;
 
@@ -475,17 +461,17 @@
             document.getElementById(viewId).classList.add('active');
         }
 
-        // Admin login function
+        // Admin login function - Updated to use Supabase admins table
         async function attemptAdminLogin() {
-            const username = document.getElementById('admin-username').value;
+            const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
             const errorElement = document.getElementById('login-error');
             const loadingElement = document.getElementById('login-loading');
             
             errorElement.style.display = 'none';
             
-            if (!username || !password) {
-                errorElement.textContent = 'Please enter both username and password';
+            if (!email || !password) {
+                errorElement.textContent = 'Please enter both email and password';
                 errorElement.style.display = 'block';
                 return;
             }
@@ -493,32 +479,40 @@
             loadingElement.style.display = 'block';
             
             try {
-                // Check against predefined credentials
-                let authenticatedUser = null;
+                // Check against admins table in Supabase
+                const { data: admins, error } = await supabase
+                    .from('admins')
+                    .select('*')
+                    .eq('email', email);
                 
-                if (username === adminCredentials.admin.username && password === adminCredentials.admin.password) {
-                    authenticatedUser = adminCredentials.admin;
-                } else if (username === adminCredentials.superadmin.username && password === adminCredentials.superadmin.password) {
-                    authenticatedUser = adminCredentials.superadmin;
-                }
+                if (error) throw error;
                 
-                if (authenticatedUser) {
-                    // Successfully logged in
-                    currentAdmin = authenticatedUser;
-                    loadingElement.style.display = 'none';
+                if (admins && admins.length > 0) {
+                    const admin = admins[0];
                     
-                    // Show appropriate dashboard based on role
-                    if (currentAdmin.role === 'super_admin') {
-                        showView('superadmin-view');
-                        document.getElementById('logout-btn').style.display = 'block';
-                        loadSuperAdminData();
+                    // In a real application, you would use proper password hashing and verification
+                    // For now, we'll assume the password is stored in plain text (not recommended for production)
+                    if (password === admin.password) {
+                        // Successfully logged in
+                        currentAdmin = admin;
+                        loadingElement.style.display = 'none';
+                        
+                        // Show appropriate dashboard based on role
+                        if (currentAdmin.role === 'super_admin') {
+                            showView('superadmin-view');
+                            document.getElementById('logout-btn').style.display = 'block';
+                            loadSuperAdminData();
+                        } else {
+                            showView('dashboard-view');
+                            document.getElementById('logout-btn').style.display = 'block';
+                            loadDashboardData();
+                        }
                     } else {
-                        showView('dashboard-view');
-                        document.getElementById('logout-btn').style.display = 'block';
-                        loadDashboardData();
+                        errorElement.textContent = 'Invalid email or password';
+                        errorElement.style.display = 'block';
                     }
                 } else {
-                    errorElement.textContent = 'Invalid username or password';
+                    errorElement.textContent = 'Invalid email or password';
                     errorElement.style.display = 'block';
                 }
             } catch (error) {
@@ -662,16 +656,25 @@
                 return;
             }
             
-            if (password !== adminCredentials.superadmin.password) {
-                alert('Incorrect super admin password');
-                return;
-            }
-            
-            if (!confirm('ARE YOU ABSOLUTELY SURE?\n\nThis action will delete ALL votes and reset the election. This cannot be undone.')) {
-                return;
-            }
-            
+            // Verify super admin password
             try {
+                const { data: superAdmin, error } = await supabase
+                    .from('admins')
+                    .select('*')
+                    .eq('email', currentAdmin.email)
+                    .eq('password', password)
+                    .eq('role', 'super_admin')
+                    .single();
+                
+                if (error || !superAdmin) {
+                    alert('Incorrect super admin password');
+                    return;
+                }
+                
+                if (!confirm('ARE YOU ABSOLUTELY SURE?\n\nThis action will delete ALL votes and reset the election. This cannot be undone.')) {
+                    return;
+                }
+                
                 // Delete all votes
                 const { error: votesError } = await supabase
                     .from('votes')
@@ -716,7 +719,7 @@
             currentAdmin = null;
             showView('login-view');
             document.getElementById('logout-btn').style.display = 'none';
-            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-email').value = '';
             document.getElementById('admin-password').value = '';
             document.getElementById('superadmin-password').value = '';
         }
@@ -735,4 +738,4 @@
         });
     </script>
 </body>
-          </html>
+    </html>
