@@ -1,0 +1,207 @@
+.app {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0077b6 0%, #48cae4 50%, #90e0ef 100%);
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.view-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 119, 182, 0.3);
+  margin-top: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #0077b6;
+}
+
+.header h1 {
+  color: #03045e;
+  margin: 0;
+  font-size: 2.2em;
+}
+
+.header p {
+  color: #0077b6;
+  margin: 5px 0 0 0;
+  font-size: 1.1em;
+}
+
+.search-box {
+  text-align: center;
+}
+
+.search-box h2 {
+  color: #03045e;
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 80%;
+  padding: 15px;
+  border: 2px solid #90e0ef;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.search-box button {
+  background: #0077b6;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.search-box button:hover {
+  background: #03045e;
+}
+
+.error {
+  color: #e63946;
+  margin-top: 10px;
+}
+
+.voter-details {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border-left: 4px solid #0077b6;
+}
+
+.voter-details p {
+  margin: 10px 0;
+  color: #495057;
+}
+
+.upload-box {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.upload-box input {
+  margin: 10px 0;
+}
+
+.position-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 15px 0;
+  border-left: 4px solid #48cae4;
+}
+
+.position-section h3 {
+  color: #03045e;
+  margin-top: 0;
+}
+
+.candidates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.candidate-option {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.candidate-option:hover {
+  background: #e9ecef;
+}
+
+.candidate-option input {
+  margin-right: 10px;
+}
+
+.submit-votes-btn {
+  background: #38b000;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.submit-votes-btn:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+}
+
+.thank-you-message {
+  text-align: center;
+  color: #38b000;
+}
+
+.already-voted {
+  text-align: center;
+  color: #6c757d;
+}
+
+.admin-access {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.admin-btn {
+  background: #6a4c93;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.back-btn {
+  background: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-login-form input {
+  padding: 12px;
+  border: 2px solid #dee2e6;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .view-container {
+    margin: 10px;
+    padding: 20px;
+  }
+  
+  .search-box input {
+    width: 95%;
+  }
+}
