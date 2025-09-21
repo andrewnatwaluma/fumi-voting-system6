@@ -603,7 +603,7 @@
                         ${position.candidates.map(candidate => `
                             <label class="candidate-option">
                                 <input type="radio" name="position-${position.id}" 
-                                    value="${candidate.id}" onchange="selectCandidate(${position.id}, ${candidate.id})">
+                                    value="${candidate.id}" onchange="selectCandidate(${position.id}, '${candidate.id}')">
                                 ${candidate.name}
                             </label>
                         `).join('')}
@@ -734,44 +734,38 @@
                 // Create a device ID based on browser fingerprint
                 const deviceId = `${navigator.userAgent}${screen.width}${screen.height}`;
                 
-                // Insert votes into Supabase
-                const votePromises = Object.entries(selectedVotes).map(([positionId, candidateId]) => {
-                    return supabase
-                        .from('votes')
-                        .insert([
-                            { 
-                                voter_id: currentVoter.id,
-                                candidate_id: candidateId,
-                                position_id: positionId,
-                                device_id: deviceId
-                            }
-                        ]);
-                });
+                // Prepare all vote inserts
+                const voteInserts = [];
+                for (const [positionId, candidateId] of Object.entries(selectedVotes)) {
+                    voteInserts.push({
+                        voter_id: currentVoter.id,
+                        candidate_id: candidateId,
+                        position_id: positionId,
+                        device_id: deviceId
+                    });
+                }
+                
+                // Insert all votes in a single transaction
+                const { data: voteData, error: voteError } = await supabase
+                    .from('votes')
+                    .insert(voteInserts);
+                
+                if (voteError) throw voteError;
                 
                 // Mark voter as voted
-                votePromises.push(
-                    supabase
-                        .from('voters')
-                        .update({ has_voted: true })
-                        .eq('id', currentVoter.id)
-                );
+                const { error: voterError } = await supabase
+                    .from('voters')
+                    .update({ has_voted: true })
+                    .eq('id', currentVoter.id);
                 
-                // Execute all promises
-                const results = await Promise.all(votePromises);
-                
-                // Check for errors
-                const hasError = results.some(result => result.error);
-                
-                if (hasError) {
-                    throw new Error('Error submitting some votes');
-                }
+                if (voterError) throw voterError;
                 
                 // Show thank you page
                 showThankYou();
                 
             } catch (error) {
                 console.error('Error submitting votes:', error);
-                alert('Error submitting votes. Please try again.');
+                alert('Error submitting votes. Please try again. Error: ' + error.message);
                 button.textContent = originalText;
                 button.disabled = false;
             }
