@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FUMI Elections 2025 - Federation For Uganda Medical Interns</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -358,6 +359,21 @@
             margin: 10px 0;
             text-align: center;
         }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #1a5f7a;
+        }
+        
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -385,6 +401,9 @@
                     </div>
                     <div id="voter-error" class="error-message" style="display: none;"></div>
                     <div id="voter-success" class="success-message" style="display: none;"></div>
+                    <div id="voter-loading" class="loading" style="display: none;">
+                        <i class="fas fa-spinner"></i> Searching voter database...
+                    </div>
                 </div>
                 
                 <div style="text-align: center; margin-top: 30px;">
@@ -430,11 +449,15 @@
                 <h2><i class="fas fa-vote-yea"></i> Cast Your Vote</h2>
                 <p>Please select one candidate for each position.</p>
                 
-                <div id="positions-container">
+                <div id="positions-loading" class="loading">
+                    <i class="fas fa-spinner"></i> Loading positions and candidates...
+                </div>
+                
+                <div id="positions-container" style="display: none;">
                     <!-- Positions will be dynamically added here -->
                 </div>
 
-                <button class="submit-votes-btn" onclick="submitVotes()" id="submit-votes-button">
+                <button class="submit-votes-btn" onclick="submitVotes()" id="submit-votes-button" style="display: none;">
                     <i class="fas fa-paper-plane"></i> Submit All Votes
                 </button>
             </div>
@@ -474,120 +497,16 @@
     </div>
 
     <script>
-        // Voter data - Simulating database
-        const voterDatabase = [
-            { id: 1, name: "Acar Jimmy", university: "Busitema University", qualification: "MBChB", 
-              nationality: "Ugandan", completionYear: 2024, internshipCenter: "Fort Portal RRH", hasVoted: false },
-            { id: 2, name: "John Omondi", university: "Makerere University", qualification: "MBChB", 
-              nationality: "Kenyan", completionYear: 2023, internshipCenter: "Mulago NRH", hasVoted: false },
-            { id: 3, name: "Sarah Musoke", university: "Mbarara University", qualification: "BPharm", 
-              nationality: "Ugandan", completionYear: 2024, internshipCenter: "Jinja RRH", hasVoted: true },
-            { id: 4, name: "Robert Mugabe", university: "Gulu University", qualification: "MBChB", 
-              nationality: "Zimbabwean", completionYear: 2023, internshipCenter: "Lira RRH", hasVoted: false },
-            { id: 5, name: "Grace Nalweiso", university: "Kampala International University", qualification: "BSc Nursing", 
-              nationality: "Ugandan", completionYear: 2024, internshipCenter: "Mbale RRH", hasVoted: false }
-        ];
-
-        // Positions and candidates data
-        const positionsData = [
-            {
-                id: 1,
-                title: "PRESIDENT",
-                candidates: [
-                    { id: 1, name: "Dr. John Omondi" },
-                    { id: 2, name: "Dr. Sarah Musoke" }
-                ]
-            },
-            {
-                id: 2,
-                title: "VICE PRESIDENT",
-                candidates: [
-                    { id: 3, name: "Dr. Robert Mugabe" },
-                    { id: 4, name: "Dr. Grace Nalweiso" }
-                ]
-            },
-            {
-                id: 3,
-                title: "SECRETARY GENERAL",
-                candidates: [
-                    { id: 5, name: "Dr. James Okello" },
-                    { id: 6, name: "Dr. Rebecca Namukwaya" }
-                ]
-            },
-            {
-                id: 4,
-                title: "TREASURER GENERAL",
-                candidates: [
-                    { id: 7, name: "Dr. Michael Ssebunya" },
-                    { id: 8, name: "Dr. Susan Ajok" }
-                ]
-            },
-            {
-                id: 5,
-                title: "CHAIRPERSON WELFARE",
-                candidates: [
-                    { id: 9, name: "Dr. Daniel Odongo" }
-                ]
-            },
-            {
-                id: 6,
-                title: "CHAIRPERSON ETHICS AND PROFESSIONALISM",
-                candidates: [
-                    { id: 10, name: "Dr. Elizabeth Katushabe" },
-                    { id: 11, name: "Dr. Patrick Lumumba" }
-                ]
-            },
-            {
-                id: 7,
-                title: "DIRECTOR OF PUBLICATIONS",
-                candidates: [
-                    { id: 12, name: "Dr. Brian Mulumba" },
-                    { id: 13, name: "Dr. Fiona Nakimera" }
-                ]
-            },
-            {
-                id: 8,
-                title: "INTERN DOCTOR'S REPRESENTATIVE",
-                candidates: [
-                    { id: 14, name: "Dr. Alex Wasswa" }
-                ]
-            },
-            {
-                id: 9,
-                title: "INTERN PHARMACISTS' REPRESENTATIVE",
-                candidates: [
-                    { id: 15, name: "Dr. Maria Goretti" },
-                    { id: 16, name: "Dr. Henry Kawooya" }
-                ]
-            },
-            {
-                id: 10,
-                title: "INTERN MIDWIVES' REPRESENTATIVE",
-                candidates: [
-                    { id: 17, name: "Dr. Prossy Nalubega" }
-                ]
-            },
-            {
-                id: 11,
-                title: "INTERN NURSE REPRESENTATIVE",
-                candidates: [
-                    { id: 18, name: "Dr. Juliet Kemi" },
-                    { id: 19, name: "Dr. Tom Lwanga" }
-                ]
-            },
-            {
-                id: 12,
-                title: "INTERN DENTAL SURGEON REPRESENTATIVE",
-                candidates: [
-                    { id: 20, name: "Dr. Samuel Nsubuga" }
-                ]
-            }
-        ];
+        // Initialize Supabase client
+        const supabaseUrl = 'https://iaenttkokcxtiauzjtgw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhZW50dGtva2N4dGlhdXpqdGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NDQ2NDksImV4cCI6MjA3MzQyMDY0OX0.u6ZBX-d_CTNlA94OM7h2JerNpmhuHZxYSXmj0OxRhRI';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         // Track current voter and votes
         let currentVoter = null;
         const selectedVotes = {};
         let votedPositions = new Set();
+        let positionsData = [];
 
         // View management functions
         function showView(viewId) {
@@ -610,9 +529,8 @@
         }
 
         function showVotingScreen() {
-            // Render all positions and candidates
-            renderPositions();
             showView('voting-screen');
+            loadPositionsAndCandidates();
         }
 
         function showThankYou() {
@@ -623,6 +541,51 @@
 
         function showAdminLogin() {
             showView('admin-login');
+        }
+
+        // Load positions and candidates from Supabase
+        async function loadPositionsAndCandidates() {
+            try {
+                document.getElementById('positions-loading').style.display = 'block';
+                document.getElementById('positions-container').style.display = 'none';
+                document.getElementById('submit-votes-button').style.display = 'none';
+                
+                // Fetch positions
+                const { data: positions, error: positionsError } = await supabase
+                    .from('positions')
+                    .select('*')
+                    .order('title');
+                
+                if (positionsError) throw positionsError;
+                
+                // Fetch candidates
+                const { data: candidates, error: candidatesError } = await supabase
+                    .from('candidates')
+                    .select('*');
+                
+                if (candidatesError) throw candidatesError;
+                
+                // Organize data
+                positionsData = positions.map(position => {
+                    return {
+                        id: position.id,
+                        title: position.title,
+                        candidates: candidates.filter(candidate => candidate.position_id === position.id)
+                    };
+                });
+                
+                // Render positions
+                renderPositions();
+                
+                document.getElementById('positions-loading').style.display = 'none';
+                document.getElementById('positions-container').style.display = 'block';
+                document.getElementById('submit-votes-button').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading positions and candidates:', error);
+                document.getElementById('positions-loading').innerHTML = 
+                    '<div class="error-message">Error loading positions and candidates. Please try again.</div>';
+            }
         }
 
         // Render all positions and candidates
@@ -672,72 +635,70 @@
             const container = document.getElementById('results-container');
             container.innerHTML = '';
             
-            // Simulated results data
-            const resultsData = [
-                { position: "PRESIDENT", candidate: "Dr. John Omondi", percentage: 52 },
-                { position: "VICE PRESIDENT", candidate: "Dr. Grace Nalweiso", percentage: 55 },
-                { position: "SECRETARY GENERAL", candidate: "Dr. James Okello", percentage: 48 },
-                { position: "TREASURER GENERAL", candidate: "Dr. Michael Ssebunya", percentage: 61 },
-                { position: "CHAIRPERSON WELFARE", candidate: "Dr. Daniel Odongo", percentage: 100 },
-                { position: "CHAIRPERSON ETHICS", candidate: "Dr. Elizabeth Katushabe", percentage: 57 },
-                { position: "DIRECTOR OF PUBLICATIONS", candidate: "Dr. Fiona Nakimera", percentage: 63 },
-                { position: "INTERN DOCTOR'S REP", candidate: "Dr. Alex Wasswa", percentage: 100 },
-                { position: "INTERN PHARMACISTS' REP", candidate: "Dr. Maria Goretti", percentage: 72 },
-                { position: "INTERN MIDWIVES' REP", candidate: "Dr. Prossy Nalubega", percentage: 100 },
-                { position: "INTERN NURSE REP", candidate: "Dr. Juliet Kemi", percentage: 68 },
-                { position: "INTERN DENTAL SURGEON REP", candidate: "Dr. Samuel Nsubuga", percentage: 100 }
-            ];
-            
-            resultsData.forEach(result => {
-                const resultElement = document.createElement('p');
-                resultElement.textContent = `${result.position}: ${result.candidate} - ${result.percentage}%`;
-                container.appendChild(resultElement);
-            });
+            // In a real implementation, you would fetch actual results from Supabase
+            const resultElement = document.createElement('p');
+            resultElement.textContent = 'Results are being calculated and will be available soon.';
+            container.appendChild(resultElement);
         }
 
-        // Functionality functions
-        function searchVoter() {
+        // Search for voter in Supabase database
+        async function searchVoter() {
             const searchInput = document.getElementById('voter-search-input');
             const errorElement = document.getElementById('voter-error');
             const successElement = document.getElementById('voter-success');
+            const loadingElement = document.getElementById('voter-loading');
             
             errorElement.style.display = 'none';
             successElement.style.display = 'none';
+            loadingElement.style.display = 'block';
             
             if (searchInput.value.trim() === '') {
                 errorElement.textContent = 'Please enter your name';
                 errorElement.style.display = 'block';
+                loadingElement.style.display = 'none';
                 return;
             }
             
-            // Search for voter (case insensitive)
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            const foundVoter = voterDatabase.find(voter => 
-                voter.name.toLowerCase().includes(searchTerm)
-            );
-            
-            if (foundVoter) {
-                if (foundVoter.hasVoted) {
-                    errorElement.textContent = 'This voter has already voted. Each voter can only vote once.';
+            try {
+                // Search for voter in Supabase (case insensitive)
+                const { data: voters, error } = await supabase
+                    .from('voters')
+                    .select('*')
+                    .ilike('name', `%${searchInput.value.trim()}%`);
+                
+                if (error) throw error;
+                
+                if (voters && voters.length > 0) {
+                    const foundVoter = voters[0];
+                    
+                    if (foundVoter.has_voted) {
+                        errorElement.textContent = 'This voter has already voted. Each voter can only vote once.';
+                        errorElement.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Set current voter
+                    currentVoter = foundVoter;
+                    
+                    // Populate voter details
+                    document.getElementById('detail-name').textContent = foundVoter.name;
+                    document.getElementById('detail-university').textContent = foundVoter.university || 'Not specified';
+                    document.getElementById('detail-qualification').textContent = foundVoter.qualification || 'Not specified';
+                    document.getElementById('detail-nationality').textContent = foundVoter.nationality || 'Not specified';
+                    document.getElementById('detail-year').textContent = foundVoter.completion_year || 'Not specified';
+                    document.getElementById('detail-center').textContent = foundVoter.internship_center || 'Not specified';
+                    
+                    showVoterDetails();
+                } else {
+                    errorElement.textContent = 'Voter not found. Please check your name and try again.';
                     errorElement.style.display = 'block';
-                    return;
                 }
-                
-                // Set current voter
-                currentVoter = foundVoter;
-                
-                // Populate voter details
-                document.getElementById('detail-name').textContent = foundVoter.name;
-                document.getElementById('detail-university').textContent = foundVoter.university;
-                document.getElementById('detail-qualification').textContent = foundVoter.qualification;
-                document.getElementById('detail-nationality').textContent = foundVoter.nationality;
-                document.getElementById('detail-year').textContent = foundVoter.completionYear;
-                document.getElementById('detail-center').textContent = foundVoter.internshipCenter;
-                
-                showVoterDetails();
-            } else {
-                errorElement.textContent = 'Voter not found. Please check your name and try again.';
+            } catch (error) {
+                console.error('Error searching for voter:', error);
+                errorElement.textContent = 'Error searching for voter. Please try again.';
                 errorElement.style.display = 'block';
+            } finally {
+                loadingElement.style.display = 'none';
             }
         }
 
@@ -756,7 +717,7 @@
             }, 3000);
         }
 
-        function submitVotes() {
+        async function submitVotes() {
             // Check if all positions have been voted for
             if (votedPositions.size !== positionsData.length) {
                 alert('Please vote for all positions before submitting.');
@@ -769,15 +730,51 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Votes...';
             button.disabled = true;
             
-            // Mark voter as voted
-            if (currentVoter) {
-                currentVoter.hasVoted = true;
-            }
-            
-            // Simulate vote submission
-            setTimeout(() => {
+            try {
+                // Create a device ID based on browser fingerprint
+                const deviceId = `${navigator.userAgent}${screen.width}${screen.height}`;
+                
+                // Insert votes into Supabase
+                const votePromises = Object.entries(selectedVotes).map(([positionId, candidateId]) => {
+                    return supabase
+                        .from('votes')
+                        .insert([
+                            { 
+                                voter_id: currentVoter.id,
+                                candidate_id: candidateId,
+                                position_id: positionId,
+                                device_id: deviceId
+                            }
+                        ]);
+                });
+                
+                // Mark voter as voted
+                votePromises.push(
+                    supabase
+                        .from('voters')
+                        .update({ has_voted: true })
+                        .eq('id', currentVoter.id)
+                );
+                
+                // Execute all promises
+                const results = await Promise.all(votePromises);
+                
+                // Check for errors
+                const hasError = results.some(result => result.error);
+                
+                if (hasError) {
+                    throw new Error('Error submitting some votes');
+                }
+                
+                // Show thank you page
                 showThankYou();
-            }, 2000);
+                
+            } catch (error) {
+                console.error('Error submitting votes:', error);
+                alert('Error submitting votes. Please try again.');
+                button.textContent = originalText;
+                button.disabled = false;
+            }
         }
 
         function attemptAdminLogin() {
@@ -799,4 +796,4 @@
         });
     </script>
 </body>
-                                                   </html>
+</html>
