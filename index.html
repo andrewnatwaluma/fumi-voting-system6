@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUMI Elections 2025 - Federation For Uganda Medical Interns</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a5f7a 0%, #228B22 50%, #9370DB 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(to right, #1a5f7a, #228B22);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 10px, transparent 20px),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 15px, transparent 25px);
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .medical-icons {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 15px;
+            font-size: 2em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .search-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box h2 {
+            color: #1a5f7a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .search-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #228B22;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #228B22;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #1a7a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-btn {
+            background: #9370DB;
+        }
+
+        .admin-btn:hover {
+            background: #7B68EE;
+        }
+
+        .back-btn {
+            background: #6c757d;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .view-container {
+            display: none;
+        }
+
+        .view-container.active {
+            display: block;
+        }
+
+        .voter-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #1a5f7a;
+        }
+
+        .voter-details p {
+            margin: 10px 0;
+            color: #495057;
+            display: flex;
+        }
+
+        .voter-details strong {
+            color: #1a5f7a;
+            min-width: 150px;
+            display: inline-block;
+        }
+
+        .upload-box {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            border: 2px dashed #1a5f7a;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+
+        .upload-hint {
+            color: #6c757d;
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .position-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #9370DB;
+        }
+
+        .position-section h3 {
+            color: #1a5f7a;
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .candidates-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .candidate-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 1px solid #dee2e6;
+        }
+
+        .candidate-option:hover {
+            background: #e9ecef;
+            border-color: #1a5f7a;
+        }
+
+        .candidate-option input {
+            margin-right: 10px;
+        }
+
+        .submit-votes-btn {
+            background: #228B22;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .submit-votes-btn:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        .thank-you-message {
+            text-align: center;
+            color: #228B22;
+            padding: 30px;
+        }
+
+        .thank-you-message h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .thank-you-message p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .results-preview {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .already-voted {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+        }
+
+        .admin-login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .admin-login-form input {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #1a5f7a;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .search-input {
+                flex-direction: column;
+            }
+            
+            input[type="text"] {
+                width: 100%;
+            }
+        }
+
+        /* Medical graphic elements */
+        .medical-border {
+            border: 2px solid #1a5f7a;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .medical-border::before {
+            content: "⚕";
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            color: #1a5f7a;
+            font-size: 1.5em;
+        }
+
+        .pulse-animation {
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>FUMI Elections 2025</h1>
+            <p>Federation For Uganda Medical Interns</p>
+            <div class="medical-icons">
+                <i class="fas fa-stethoscope"></i>
+                <i class="fas fa-syringe"></i>
+                <i class="fas fa-heartbeat"></i>
+                <i class="fas fa-plus-square"></i>
+                <i class="fas fa-user-md"></i>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Voter Search View -->
+            <div class="view-container active" id="voter-search">
+                <div class="search-box">
+                    <h2><i class="fas fa-search"></i> Find Your Voter Profile</h2>
+                    <div class="search-input">
+                        <input type="text" placeholder="Enter your full name..." id="voter-search-input">
+                        <button onclick="searchVoter()">Search</button>
+                    </div>
+                    <p id="voter-error" style="color: #e63946; display: none;">Voter not found. Please check your name and try again.</p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="admin-btn" onclick="showAdminLogin()">
+                        <i class="fas fa-lock"></i> Admin Login
+                    </button>
+                </div>
+            </div>
+
+            <!-- Voter Details View -->
+            <div class="view-container" id="voter-details">
+                <h2><i class="fas fa-user-circle"></i> Voter Information</h2>
+                <div class="voter-details">
+                    <p><strong>Name:</strong> Acar Jimmy</p>
+                    <p><strong>University:</strong> Busitema University</p>
+                    <p><strong>Qualification:</strong> MBChB</p>
+                    <p><strong>Nationality:</strong> Ugandan</p>
+                    <p><strong>Completion Year:</strong> 2024</p>
+                    <p><strong>Internship Center:</strong> Fort Portal RRH</p>
+                </div>
+                <button onclick="showProvisionalUpload()">Proceed to Vote</button>
+                <button class="back-btn" onclick="showVoterSearch()">Back to Search</button>
+            </div>
+
+            <!-- Provisional Upload View -->
+            <div class="view-container" id="provisional-upload">
+                <h2><i class="fas fa-id-card"></i> Identity Verification</h2>
+                <p>Please upload a clear photo of your provisional license for verification.</p>
+                
+                <div class="medical-border">
+                    <div class="upload-box">
+                        <input type="file" accept="image/*" id="license-upload">
+                        <p class="upload-hint"><i class="fas fa-camera"></i> Tap to open your camera or select a photo from your gallery</p>
+                    </div>
+                </div>
+                
+                <button onclick="simulateVerification()">Verify and Continue</button>
+                <button class="back-btn" onclick="showVoterDetails()">Back to Details</button>
+            </div>
+
+            <!-- Voting Screen View -->
+            <div class="view-container" id="voting-screen">
+                <h2><i class="fas fa-vote-yea"></i> Cast Your Vote</h2>
+                <p>Please select one candidate for each position.</p>
+                
+                <div class="position-section">
+                    <h3>President</h3>
+                    <div class="candidates-list">
+                        <label class="candidate-option">
+                            <input type="radio" name="president" value="candidate1">
+                            Dr. John Omondi
+                        </label>
+                        <label class="candidate-option">
+                            <input type="radio" name="president" value="candidate2">
+                            Dr. Sarah Musoke
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="position-section">
+                    <h3>Vice President</h3>
+                    <div class="candidates-list">
+                        <label class="candidate-option">
+                            <input type="radio" name="vice-president" value="candidate1">
+                            Dr. Robert Mugabe
+                        </label>
+                        <label class="candidate-option">
+                            <input type="radio" name="vice-president" value="candidate2">
+                            Dr. Grace Nalweiso
+                        </label>
+                    </div>
+                </div>
+                
+                <button class="submit-votes-btn" onclick="submitVotes()">
+                    <i class="fas fa-paper-plane"></i> Submit All Votes
+                </button>
+            </div>
+
+            <!-- Thank You View -->
+            <div class="view-container" id="thank-you">
+                <div class="thank-you-message">
+                    <h2><i class="fas fa-check-circle pulse-animation"></i> Thank You for Voting!</h2>
+                    <p>Your vote has been successfully recorded.</p>
+                    <p>Your participation strengthens our medical community.</p>
+                    
+                    <div class="results-preview">
+                        <h3><i class="fas fa-chart-pie"></i> Current Results (Percentages)</h3>
+                        <p>President: Omondi 52% - Musoke 48%</p>
+                        <p>Vice President: Mugabe 45% - Nalweiso 55%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Login View -->
+            <div class="view-container" id="admin-login">
+                <h2><i class="fas fa-lock"></i> Admin Login</h2>
+                <div class="admin-login-form">
+                    <input type="text" placeholder="Username">
+                    <input type="password" placeholder="Password">
+                    <button onclick="attemptAdminLogin()">Login</button>
+                    <button class="back-btn" onclick="showVoterSearch()">Back to Voter Login</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Federation For Uganda Medical Interns</p>
+            <p>P.O BOX 103050 Kampala Uganda</p>
+        </div>
+    </div>
+
+    <script>
+        // View management functions
+        function showView(viewId) {
+            document.querySelectorAll('.view-container').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function showVoterSearch() {
+            showView('voter-search');
+        }
+
+        function showVoterDetails() {
+            showView('voter-details');
+        }
+
+        function showProvisionalUpload() {
+            showView('provisional-upload');
+        }
+
+        function showVotingScreen() {
+            showView('voting-screen');
+        }
+
+        function showThankYou() {
+            showView('thank-you');
+        }
+
+        function showAdminLogin() {
+            showView('admin-login');
+        }
+
+        // Functionality functions
+        function searchVoter() {
+            const searchInput = document.getElementById('voter-search-input');
+            const errorElement = document.getElementById('voter-error');
+            
+            if (searchInput.value.trim() === '') {
+                errorElement.textContent = 'Please enter your name';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            // Simulate search - in a real app, this would call your Supabase database
+            if (searchInput.value.toLowerCase().includes('acar')) {
+                showVoterDetails();
+                errorElement.style.display = 'none';
+            } else {
+                errorElement.textContent = 'Voter not found. Please check your name and try again.';
+                errorElement.style.display = 'block';
+            }
+        }
+
+        function simulateVerification() {
+            // Show loading state
+            const button = document.querySelector('#provisional-upload button');
+            const originalText = button.textContent;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            button.disabled = true;
+            
+            // Simulate verification process
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.disabled = false;
+                showVotingScreen();
+            }, 3000);
+        }
+
+        function submitVotes() {
+            // Show loading state
+            const button = document.querySelector('.submit-votes-btn');
+            const originalText = button.textContent;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Votes...';
+            button.disabled = true;
+            
+            // Simulate vote submission
+            setTimeout(() => {
+                showThankYou();
+            }, 2000);
+        }
+
+        function attemptAdminLogin() {
+            alert('Admin login functionality will be implemented in the next version.');
+        }
+
+        // Initialize the app
+        document.getElementById('voter-search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchVoter();
+            }
+        });
+    </script>
+</body>
+</html>
