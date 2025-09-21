@@ -240,7 +240,6 @@ function App() {
               <input 
                 type="file" 
                 accept="image/*" 
-                capture="camera" 
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     // Simulate a 5-second verification process
