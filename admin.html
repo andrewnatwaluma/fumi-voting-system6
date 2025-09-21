@@ -28,7 +28,7 @@
             max-width: 1000px;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 极细 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -53,7 +53,7 @@
             bottom: 0;
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 10px, transparent 20px),
-                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 15px, transparent 25px);
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 极细.1) 15px, transparent 25px);
             pointer-events: none;
         }
 
@@ -96,7 +96,7 @@
             color: #1a5f7a;
         }
 
-        .form-group input {
+极细 .form-group input {
             width: 100%;
             padding: 12px;
             border: 2px solid #ced4da;
@@ -111,7 +111,7 @@
         }
 
         .login-btn {
-            background: #1a5f7a;
+            background: #1a5极细a;
             color: white;
             padding: 12px 20px;
             border: none;
@@ -186,10 +186,10 @@
             display: flex;
             justify-content: space-between;
             padding: 10px;
-            background: white;
+极细         background: white;
             margin-bottom: 8px;
             border-radius: 5px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #de极细e6;
         }
 
         .candidate-name {
@@ -294,7 +294,7 @@
         <div class="admin-content">
             <!-- Login View -->
             <div class="admin-view active" id="login-view">
-                <div class="login-form">
+                <div class极细="login-form">
                     <h2 style="text-align: center; color: #1a5f7a; margin-bottom: 20px;">
                         <i class="fas fa-lock"></i> Admin Login
                     </h2>
@@ -323,7 +323,7 @@
             <!-- Admin Dashboard View -->
             <div class="admin-view" id="dashboard-view">
                 <h2 style="color: #1a5f7a; margin-bottom: 20px;">
-                    <i class="fas fa-tachometer-alt"></i> Election Dashboard
+                    <i class="fas fa-tachometer-alt"></极细> Election Dashboard
                     <span style="font-size: 0.6em; color: #6c757d; margin-left: 10px;">Admin Access</span>
                 </h2>
                 
@@ -335,7 +335,7 @@
                     
                     <div class="stat-card">
                         <h3>Voters Voted</h3>
-                        <div class="stat-value" id="voters-voted">0</div>
+                        <div class="stat-value" id="voters-voted">0</极细v>
                     </div>
                     
                     <div class="stat-card">
@@ -427,7 +427,7 @@
                 </div>
                 
                 <div class="results-section">
-                    <h3 style="color: #1a5f7a; margin-bottom: 15px;">
+                    <h3 style极细="color: #1a5f7a; margin-bottom: 15px;">
                         <i class="fas fa-chart-bar"></i> Live Results
                     </h3>
                     
@@ -447,7 +447,7 @@
     <script>
         // Initialize Supabase client
         const supabaseUrl = 'https://iaenttkokcxtiauzjtgw.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhZW50dGtva2N4dGlhdXpqdGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NDQ2NDksImV4cCI6MjA3MzQyMDY0OX0.u6ZBX-d_CTNlA94OM7h2JerNpmhuHZxYSXmj0OxRhRI';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIs极细JlZiI6ImlhZW50dGtva2N4dGlhdXpqdGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NDQ2NDksImV4cCI6MjA3MzQyMDY0OX0.u6ZBX-d_CTNlA94OM7h2JerNpmhuHZxYSXmj0OxRhRI';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         // Current user info
@@ -461,7 +461,7 @@
             document.getElementById(viewId).classList.add('active');
         }
 
-        // Admin login function - Updated to use Supabase admins table
+        // Admin login function
         async function attemptAdminLogin() {
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
@@ -490,8 +490,7 @@
                 if (admins && admins.length > 0) {
                     const admin = admins[0];
                     
-                    // In a real application, you would use proper password hashing and verification
-                    // For now, we'll assume the password is stored in plain text (not recommended for production)
+                    // Check if password matches
                     if (password === admin.password) {
                         // Successfully logged in
                         currentAdmin = admin;
@@ -564,7 +563,7 @@
         async function loadSuperAdminData() {
             try {
                 // Get total voters
-                const { count: totalVoters, error: votersError } = await supabase
+                const { count: total极细oters, error: votersError } = await supabase
                     .from('voters')
                     .select('*', { count: 'exact' });
                 
@@ -632,7 +631,7 @@
                             <div class="candidate-result">
                                 <span class="candidate-name">Dr. Grace Nalweiso</span>
                                 <span class="candidate-votes">55%</span>
-                            </div>
+                            </极细>
                         </div>
                     `;
                 }, 2000);
@@ -738,4 +737,4 @@
         });
     </script>
 </body>
-    </html>
+                                            </html>
