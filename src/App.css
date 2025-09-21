@@ -86,11 +86,24 @@
 
 .upload-box {
   text-align: center;
-  margin: 20px 0;
+  margin: 25px 0;
+  padding: 20px;
+  border: 2px dashed #48cae4;
+  border-radius: 10px;
+  background-color: #f8f9fa;
 }
 
 .upload-box input {
-  margin: 10px 0;
+  display: block;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.upload-hint {
+  color: #6c757d;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 10px;
 }
 
 .position-section {
@@ -204,4 +217,4 @@
   .search-box input {
     width: 95%;
   }
-}
+  }
