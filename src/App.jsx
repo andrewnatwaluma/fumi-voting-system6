@@ -194,7 +194,7 @@ function App() {
         return (
           <div className="view-container">
             <div className="header">
-              <h1>FUMI Elections 2024</h1>
+              <h1>FUMI Elections 2025</h1>
               <p>Federation For Uganda Medical Interns</p>
             </div>
             <div className="search-box">
