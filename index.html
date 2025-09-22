@@ -214,7 +214,7 @@
             align-items: center;
             padding: 12px;
             background: white;
-            border-radius: 5px;
+            borderRadius: 5px;
             cursor: pointer;
             transition: background 0.2s;
             border: 1px solid #dee2e6;
@@ -790,12 +790,21 @@
             }
         }
 
+        // Updated Admin Login Function
         function attemptAdminLogin() {
             const username = document.getElementById('admin-username').value;
             const password = document.getElementById('admin-password').value;
             
-            if (username === 'admin' && password === 'password') {
-                alert('Admin login successful! Admin features will be implemented in the next version.');
+            // Use the same credentials as admin-login.html
+            const ADMIN_CREDENTIALS = {
+                'admin': 'adminpassword',
+                'superadmin': 'superpassword'
+            };
+
+            if (ADMIN_CREDENTIALS[username] === password) {
+                // Store the role and redirect to admin dashboard
+                localStorage.setItem('adminRole', username);
+                window.location.href = 'admin-dashboard.html';
             } else {
                 alert('Invalid admin credentials. Please try again.');
             }
