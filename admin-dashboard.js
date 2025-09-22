@@ -1,6 +1,6 @@
 // admin-dashboard.js - COMPLETELY FIXED VERSION
 const supabaseUrl = 'https://iaenttkokcxtiauzjtgw.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6ImlhZW50dGtva2N4dGlhdXpqdGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NDQ2NDksImV4cCI6MjA3MzQyMDY0OX0.u6ZBX-d_CTNlA94OM7h2JerNpmhuHZxYSXmj0OxRhRI';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhZW50dGtva2N4dGlhdXpqdGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NDQ2NDksImV4cCI6MjA3MzQyMDY0OX0.u6ZBX-d_CTNlA94OM7h2JerNpmhuHZxYSXmj0OxRhRI';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
 // Check authentication on page load
@@ -140,7 +140,7 @@ async function lookupVoter() {
     const resultDiv = document.getElementById('voterLookupResult');
     
     if (!voterName) {
-        resultDiv.innerHTML = '<p class="message">Please enter a voter name</p>';
+        resultDiv.innerHTML = '<p class="message error">Please enter a voter name</p>';
         return;
     }
 
@@ -169,7 +169,7 @@ async function lookupVoter() {
         if (error) throw error;
 
         if (!voter) {
-            resultDiv.innerHTML = '<p class="message">Voter not found</p>';
+            resultDiv.innerHTML = '<p class="message error">Voter not found</p>';
             return;
         }
 
@@ -197,7 +197,7 @@ async function lookupVoter() {
         `;
     } catch (error) {
         console.error('Search error:', error);
-        resultDiv.innerHTML = '<p class="message">Error searching voter</p>';
+        resultDiv.innerHTML = '<p class="message error">Error searching voter</p>';
     }
 }
 
@@ -221,15 +221,18 @@ async function changeVote() {
     
     if (!window.selectedVoterId) {
         messageElement.textContent = 'Please select a voter first';
+        messageElement.className = 'message error';
         return;
     }
 
     if (!candidateId) {
         messageElement.textContent = 'Please select a candidate';
+        messageElement.className = 'message error';
         return;
     }
 
     messageElement.textContent = 'Changing vote...';
+    messageElement.className = 'message';
 
     try {
         // First, get the candidate's position_id
@@ -272,7 +275,7 @@ async function changeVote() {
         if (updateError) throw updateError;
 
         messageElement.textContent = 'Vote successfully changed!';
-        messageElement.style.color = 'green';
+        messageElement.className = 'message success';
         
         // Refresh data
         setTimeout(() => {
@@ -283,7 +286,7 @@ async function changeVote() {
     } catch (error) {
         console.error('Vote change error:', error);
         messageElement.textContent = 'Error: ' + error.message;
-        messageElement.style.color = 'red';
+        messageElement.className = 'message error';
     }
 }
 
@@ -293,17 +296,11 @@ function logout() {
     window.location.href = 'admin-login.html';
 }
 
-// Make functions globally available
-window.lookupVoter = lookupVoter;
-window.selectVoter = selectVoter;
-window.changeVote = changeVote;
-window.logout = logout;
-
 // Superadmin functions
 async function restartElection() {
     const password = prompt("Enter superadmin password to confirm election restart:");
     
-    if (password !== "superadmin_password") { // Replace with actual password check
+    if (password !== "superpassword") { // Use the actual superadmin password
         alert("Invalid password. Election restart cancelled.");
         return;
     }
@@ -312,35 +309,32 @@ async function restartElection() {
         return;
     }
     
-    // Delete all votes
-    const { error } = await supabase
-        .from('votes')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all votes
-    
-    if (error) {
-        console.error("Error deleting votes:", error);
-        alert("Error restarting election.");
-        return;
+    try {
+        // Delete all votes
+        const { error } = await supabase
+            .from('votes')
+            .delete()
+            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all votes
+        
+        if (error) throw error;
+        
+        // Reset all voters
+        const { error: voterError } = await supabase
+            .from('voters')
+            .update({ has_voted: false })
+            .neq('id', '00000000-0000-0000-0000-000000000000');
+        
+        if (voterError) throw voterError;
+        
+        // Clear device voting flags
+        localStorage.removeItem('hasVotedOnThisDevice');
+        
+        alert("Election has been successfully restarted. All votes have been cleared.");
+        location.reload();
+    } catch (error) {
+        console.error("Error restarting election:", error);
+        alert("Error restarting election: " + error.message);
     }
-    
-    // Reset all voters
-    const { error: voterError } = await supabase
-        .from('voters')
-        .update({ has_voted: false })
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-    
-    if (voterError) {
-        console.error("Error resetting voters:", voterError);
-        alert("Error resetting voters.");
-        return;
-    }
-    
-    // Clear device voting flags
-    localStorage.removeItem('hasVotedOnThisDevice');
-    
-    alert("Election has been successfully restarted. All votes have been cleared.");
-    location.reload();
 }
 
 // Export results to PDF
@@ -352,39 +346,55 @@ async function exportResultsPDF() {
 
 // View voted voters list
 async function showVotedVoters() {
-    const { data: voters, error } = await supabase
-        .from('voted_voters')
-        .select('*')
-        .order('voted_at', { ascending: false });
-    
-    if (error) {
-        console.error("Error loading voted voters:", error);
-        return;
-    }
-    
-    // Display the list of voted voters
-    const container = document.getElementById('superAdminContent');
-    container.innerHTML = `
-        <h3>Voters Who Have Voted (${voters.length})</h3>
-        <div style="max-height: 400px; overflow-y: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #f8f9fa;">
-                        <th style="padding: 10px; border: 1px solid #ddd;">Name</th>
-                        <th style="padding: 10px; border: 1px solid #ddd;">University</th>
-                        <th style="padding: 10px; border: 1px solid #ddd;">Voted At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${voters.map(voter => `
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${voter.name}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${voter.university}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${new Date(voter.voted_at).toLocaleString()}</td>
+    try {
+        const { data: voters, error } = await supabase
+            .from('voters')
+            .select('*')
+            .eq('has_voted', true)
+            .order('name');
+        
+        if (error) {
+            console.error("Error loading voted voters:", error);
+            alert("Error loading voted voters: " + error.message);
+            return;
+        }
+        
+        // Display the list of voted voters
+        const container = document.getElementById('superAdminContent');
+        container.innerHTML = `
+            <h3>Voters Who Have Voted (${voters.length})</h3>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 10px; border: 1px solid #ddd;">Name</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">University</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Voted</th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-            }
+                    </thead>
+                    <tbody>
+                        ${voters.map(voter => `
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${voter.name}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${voter.university || 'N/A'}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${voter.has_voted ? 'Yes' : 'No'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (error) {
+        console.error("Error in showVotedVoters:", error);
+        alert("Error: " + error.message);
+    }
+}
+
+// Make functions globally available
+window.lookupVoter = lookupVoter;
+window.selectVoter = selectVoter;
+window.changeVote = changeVote;
+window.logout = logout;
+window.restartElection = restartElection;
+window.exportResultsPDF = exportResultsPDF;
+window.showVotedVoters = showVotedVoters;
