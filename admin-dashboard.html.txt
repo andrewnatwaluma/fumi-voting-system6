@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Admin Dashboard</h1>
+            <p>Logged in as: <span id="currentAdmin"></span></p>
+            <button onclick="logout()" style="background: #ff4444;">Logout</button>
+        </header>
+
+        <main>
+            <div id="adminDashboard">
+                <h2>Election Overview</h2>
+                <div id="adminStats">
+                    <p>Loading statistics...</p>
+                </div>
+
+                <h2>Live Results</h2>
+                <div id="adminResultsContainer">
+                    <!-- Results will be loaded here -->
+                </div>
+
+                <!-- SUPER ADMIN SECTION - Only shows for superadmin -->
+                <div id="superAdminSection" style="display: none;">
+                    <hr>
+                    <h2>Super Admin Tools</h2>
+                    <p><em>Advanced voter management</em></p>
+                    
+                    <div>
+                        <h3>Voter Lookup</h3>
+                        <input type="text" id="voterLookupName" placeholder="Enter voter name">
+                        <button onclick="lookupVoter()">Find Voter</button>
+                        <div id="voterLookupResult"></div>
+                    </div>
+
+                    <div id="voterActionSection" style="display: none;">
+                        <h4>Voter Actions for: <span id="selectedVoterName"></span></h4>
+                        <p>Vote Status: <span id="voterVoteStatus"></span></p>
+                        
+                        <h4>Change Vote</h4>
+                        <select id="superAdminCandidateSelect">
+                            <option value="">Select candidate</option>
+                        </select>
+                        <button onclick="changeVote()" style="background: #ff8800;">Override Vote</button>
+                        <p id="superAdminMessage" class="message"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Load Supabase and admin JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>

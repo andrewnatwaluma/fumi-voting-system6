@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Administrator Access</h1>
+        </header>
+
+        <main>
+            <section>
+                <h2>Login</h2>
+                <p>Restricted area. Authorized personnel only.</p>
+                
+                <input type="text" id="adminUsername" placeholder="Username">
+                <input type="password" id="adminPassword" placeholder="Password">
+                <button onclick="handleAdminLogin()">Login</button>
+                
+                <p id="adminLoginMessage" class="message"></p>
+                
+                <p><a href="index.html">Back to Voter Login</a></p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Simple hardcoded credentials for demonstration
+        const ADMIN_CREDENTIALS = {
+            'admin': 'adminpassword',
+            'superadmin': 'superpassword'
+        };
+
+        function handleAdminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const messageElement = document.getElementById('adminLoginMessage');
+
+            if (ADMIN_CREDENTIALS[username] === password) {
+                // Store the role and redirect to dashboard
+                localStorage.setItem('adminRole', username);
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                messageElement.textContent = 'Invalid username or password';
+                messageElement.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>
